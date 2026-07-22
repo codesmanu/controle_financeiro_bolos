@@ -216,7 +216,7 @@ O projeto permite:
 
 # 🎯 Objetivo
 
-O projeto foi desenvolvido para automatizar tarefas financeiras de uma confeitaria, reduzindo erros em controles manuais e proporcionando uma visão clara dos resultados financeiros através de planilhas, dashboards e relatórios.
+O projeto foi desenvolvido para automatizar tarefas financeiras de uma confeitaria familiar, reduzindo erros em controles manuais e proporcionando uma visão clara dos resultados financeiros através de planilhas, dashboards e relatórios simples de entender. 
 
 Além disso, demonstra a utilização prática do Python para automação de processos administrativos e análise de dados.
 
