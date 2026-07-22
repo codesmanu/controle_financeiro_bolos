@@ -2,7 +2,7 @@
 
 Projeto desenvolvido em **Python** para automatizar o controle financeiro de uma confeitaria, facilitando o gerenciamento de vendas, custos, lucros e relatórios.
 
-O sistema permite criar planilhas financeiras automaticamente, atualizar registros, calcular indicadores de lucro, gerar dashboards com gráficos e exportar relatórios em PDF.
+O sistema permite criar planilhas financeiras automaticamente, atualizar preços, calcular indicadores de lucro, gerar dashboards com gráficos e exportar relatórios em PDF.
 
 ---
 
@@ -11,17 +11,28 @@ O sistema permite criar planilhas financeiras automaticamente, atualizar registr
 ```text
 bolos_financas/
 │
-├── atualizar_planilha.py          # Atualiza os dados de uma planilha existente
-├── calcular_lucro.py              # Calcula custos, receitas e lucros
-├── gerar_dashboard.py             # Gera gráficos e dashboard financeiro
-├── gerar_pdf.py                   # Exporta relatórios em PDF
-├── gerar_planilha.py              # Cria a planilha base de finanças
+├── precos.json                     # Fonte única dos preços dos ingredientes (dados)
+├── precos.py                       # Funções para ler/gravar o precos.json
+├── ficha_tecnica.py                 # Monta a aba "Ficha Técnica" (usado por gerar_planilha.py e gerar_dashboard.py)
 │
-├── Minha_Planilha_Completa.xlsx   # Planilha consolidada
-├── Minha_Planilha_Gerada.xlsx     # Planilha criada pelos scripts
-├── requirements.txt               # Dependências do projeto
-└── README.md                      # Documentação
+├── atualizar_planilha.py           # Atualiza um preço em precos.json e regenera as planilhas
+├── calcular_lucro.py               # Calcula custos, receitas e lucros (usado também pelo gerar_pdf.py)
+├── gerar_dashboard.py               # Gera a planilha completa: ficha técnica + vendas + dashboard com gráfico
+├── gerar_pdf.py                     # Exporta relatório em PDF
+├── gerar_planilha.py                # Cria a planilha simples, só com a ficha técnica
+│
+├── Minha_Planilha_Completa.xlsx    # Planilha consolidada (gerada)
+├── Minha_Planilha_Gerada.xlsx      # Planilha simples (gerada)
+├── requirements.txt                 # Dependências do projeto
+└── README.md                        # Documentação
 ```
+
+> **Sobre a fonte única de preços:** antes, os preços dos ingredientes estavam
+> duplicados dentro de `gerar_planilha.py`, `gerar_dashboard.py` e
+> `calcular_lucro.py`. Agora eles moram só em `precos.json`, e todo mundo lê
+> dali. Isso significa que **atualizar um preço com `atualizar_planilha.py`
+> afeta automaticamente todos os arquivos gerados depois** — planilhas,
+> cálculo de lucro e PDF.
 
 ---
 
@@ -79,7 +90,7 @@ pip install -r requirements.txt
 Caso ainda não exista, instale manualmente as bibliotecas utilizadas:
 
 ```bash
-pip install openpyxl reportlab pandas matplotlib
+pip install openpyxl reportlab
 ```
 
 ---
@@ -96,47 +107,48 @@ pip freeze > requirements.txt
 
 # 🚀 Como Executar
 
-Os scripts foram separados por funcionalidades específicas.
+## 1️⃣ Gerar a Planilha Simples (opcional)
 
-A ordem recomendada de execução é apresentada abaixo.
-
----
-
-## 1️⃣ Gerar a Planilha Base
-
-Cria a estrutura inicial da planilha financeira.
+Cria só a ficha técnica, sem vendas nem dashboard.
 
 ```bash
 python gerar_planilha.py
 ```
 
-Será criado o arquivo:
-
-```text
-Minha_Planilha_Gerada.xlsx
-```
+Gera: `Minha_Planilha_Gerada.xlsx`
 
 ---
 
-## 2️⃣ Atualizar a Planilha
+## 2️⃣ Gerar a Planilha Completa
 
-Atualiza os dados financeiros existentes.
+Cria a ficha técnica + o controle de vendas + o dashboard com gráfico, tudo no mesmo arquivo.
+
+```bash
+python gerar_dashboard.py
+```
+
+Gera: `Minha_Planilha_Completa.xlsx`
+
+---
+
+## 3️⃣ Atualizar um Preço
+
+Quando um ingrediente mudar de preço no mercado, rode:
 
 ```bash
 python atualizar_planilha.py
 ```
 
-Este script atualiza o arquivo:
-
-```text
-Minha_Planilha_Completa.xlsx
-```
+Esse script atualiza `precos.json` e pergunta se você quer regenerar as duas
+planilhas (`Minha_Planilha_Gerada.xlsx` e `Minha_Planilha_Completa.xlsx`) na
+hora com o preço novo. Se você disser não, é só rodar os passos 1 e 2 de
+novo quando quiser aplicar o preço.
 
 ---
 
-## 3️⃣ Calcular Lucros
+## 4️⃣ Calcular Lucros
 
-Executa os cálculos financeiros.
+Executa os cálculos financeiros no terminal.
 
 ```bash
 python calcular_lucro.py
@@ -144,35 +156,20 @@ python calcular_lucro.py
 
 São calculados automaticamente:
 
-- Receita
-- Custos
-- Lucro Bruto
-- Lucro Líquido
-- Margem de Lucro
+- Custo por bolo (massa, recheio, calda, embalagem, margem de segurança)
+- Lucro por venda a R$ 12 e R$ 13
+- Fechamento do mês (faturamento, custo consumido, lucro real)
 
----
-
-## 4️⃣ Gerar Dashboard
-
-Cria gráficos e indicadores financeiros.
-
-```bash
-python gerar_dashboard.py
-```
-
-O dashboard apresenta informações como:
-
-- Faturamento
-- Custos
-- Lucro
-- Comparativos financeiros
-- Indicadores de desempenho
+Pra fechar outro mês, edite as três primeiras linhas de `gerar_pdf.py`
+(`NOME_MES`, `BOLOS_VENDIDOS`, `FATURAMENTO_TOTAL`) — o resto é recalculado
+sozinho a partir do `precos.json`.
 
 ---
 
 ## 5️⃣ Gerar Relatório em PDF
 
-Exporta um relatório financeiro completo.
+Exporta um relatório financeiro completo, com os números vindos direto do
+`calcular_lucro.py`.
 
 ```bash
 python gerar_pdf.py
@@ -186,10 +183,12 @@ O arquivo PDF será salvo automaticamente na pasta do projeto.
 
 | Script | Descrição |
 |---------|-----------|
-| **gerar_planilha.py** | Cria a estrutura inicial da planilha financeira. |
-| **atualizar_planilha.py** | Atualiza registros e informações financeiras. |
+| **precos.py** | Fonte única dos preços dos ingredientes (leitura/escrita do precos.json). |
+| **ficha_tecnica.py** | Monta a aba de ficha técnica, reaproveitada pelos dois geradores de planilha. |
+| **gerar_planilha.py** | Cria a planilha simples, só com a ficha técnica. |
+| **gerar_dashboard.py** | Cria a planilha completa: ficha técnica + vendas + dashboard com gráfico. |
+| **atualizar_planilha.py** | Atualiza um preço em precos.json e oferece regenerar as planilhas na hora. |
 | **calcular_lucro.py** | Calcula custos, receitas e lucro das vendas. |
-| **gerar_dashboard.py** | Gera gráficos e dashboard financeiro. |
 | **gerar_pdf.py** | Exporta um relatório financeiro em PDF. |
 
 ---
@@ -199,7 +198,7 @@ O arquivo PDF será salvo automaticamente na pasta do projeto.
 O projeto permite:
 
 - 📄 Criação automática de planilhas Excel
-- 💰 Controle financeiro
+- 💰 Controle financeiro com preço único e sincronizado em todos os arquivos
 - 📈 Cálculo automático de lucro
 - 📊 Dashboard financeiro
 - 📉 Gráficos de desempenho
@@ -211,8 +210,6 @@ O projeto permite:
 
 - Python
 - OpenPyXL
-- Pandas
-- Matplotlib
 - ReportLab
 
 ---
@@ -230,7 +227,3 @@ Além disso, demonstra a utilização prática do Python para automação de pro
 **Emanuelly Rackel**
 
 ---
-
-# 📄 Licença
-
-Este projeto foi desenvolvido para fins de estudo, portfólio e demonstração de conhecimentos em automação com Python.

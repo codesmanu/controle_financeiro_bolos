@@ -1,55 +1,55 @@
-import openpyxl
+import subprocess
+import sys
 
-# 1. Carregar a planilha existente que já criamos antes
-nome_arquivo = "Minha_Planilha_Gerada.xlsx"
-try:
-    wb = openpyxl.load_workbook(nome_arquivo)
-    ws = wb["1. Ficha Técnica"]
-except FileNotFoundError:
-    print(f"Erro: O arquivo '{nome_arquivo}' não foi encontrado! Rode o gerar_planilha.py primeiro.")
-    exit()
+from precos import carregar_precos, salvar_precos
 
-print("="*55)
-print(" 🍰 ATUALIZADOR AUTOMÁTICO DE PREÇOS NA PLANILHA ")
-print("="*55)
 
-# 2. Mapeamento das linhas exatas onde estão os preços na sua planilha
-itens_mapeados = {
-    "1": ("Farinha de Trigo (1kg)", 5),
-    "2": ("Açúcar (1kg)", 6),
-    "3": ("Margarina (250g)", 7),
-    "4": ("Leite Líquido (1L)", 8),
-    "5": ("Ovos (1 unidade)", 10),
-    "6": ("Leite Condensado (3 caixas)", 12),
-    "7": ("Creme de Leite (3 caixas)", 13),
-    "8": ("Chocolate em Pó 50% (1kg)", 14),
-    "9": ("Kit Embalagem + Delivery", 19)
-}
+def escolher_ingrediente(ingredientes):
+    chaves = list(ingredientes.keys())
+    print("\nEscolha qual ingrediente mudou de preço no mercado:")
+    for i, chave in enumerate(chaves, start=1):
+        print(f"  [{i}] {ingredientes[chave]['nome']}")
 
-print("\nEscolha qual ingrediente mudou de preço no mercado:")
-for chave, (nome, _) in itens_mapeados.items():
-    print(f"  [{chave}] {nome}")
+    opcao = input("\nDigite o NÚMERO do item e aperte ENTER: ")
+    if not opcao.isdigit() or not (1 <= int(opcao) <= len(chaves)):
+        print("Opção inválida. Saindo sem alterar nada...")
+        sys.exit()
+    return chaves[int(opcao) - 1]
 
-opcao = input("\nDigite o NÚMERO do item e aperte ENTER: ")
 
-if opcao in itens_mapeados:
-    nome_item, linha = itens_mapeados[opcao]
-    preco_atual = ws.cell(row=linha, column=3).value
-    print(f"\n-> O preço atual de '{nome_item}' na planilha é: R$ {preco_atual:.2f}")
-    
+def main():
+    print("=" * 55)
+    print(" 🍰 ATUALIZADOR AUTOMÁTICO DE PREÇOS ")
+    print("=" * 55)
+
+    ingredientes = carregar_precos()
+    chave = escolher_ingrediente(ingredientes)
+    item = ingredientes[chave]
+
+    print(f"\n-> O preço atual de '{item['nome']}' é: R$ {item['preco']:.2f}")
+
+    entrada = input("Digite o NOVO PREÇO pago no mercado (ex: 6.50): ").replace(",", ".")
     try:
-        # Pede o novo preço e substitui vírgula por ponto automaticamente
-        entrada_preco = input("Digite o NOVO PREÇO pago no mercado (ex: 6.50): ").replace(",", ".")
-        novo_preco = float(entrada_preco)
-        
-        # Altera o valor na célula exata da coluna 3 (Preço Pago)
-        ws.cell(row=linha, column=3, value=novo_preco)
-        
-        # Salva a planilha atualizada
-        wb.save(nome_arquivo)
-        print(f"\n✅ SUCESSO! O preço de '{nome_item}' foi atualizado para R$ {novo_preco:.2f}!")
-        print("💡 Quando você abrir a planilha no Excel, o Custo do Bolo e o Lucro já terão sido recalculados sozinhos!")
+        novo_preco = float(entrada)
     except ValueError:
         print("❌ Valor inválido! Digite apenas números (ex: 6.50).")
-else:
-    print("Saindo sem alterar nada...")
+        return
+
+    item["preco"] = novo_preco
+    salvar_precos(ingredientes)
+    print(f"\n✅ SUCESSO! O preço de '{item['nome']}' foi atualizado para R$ {novo_preco:.2f} em precos.json!")
+    print("💡 Como todos os outros scripts leem o preço daqui, o Custo do Bolo e o Lucro em qualquer")
+    print("   planilha/relatório gerado a partir de agora já vão sair recalculados com esse valor.")
+
+    resposta = input("\nQuer regenerar as planilhas (.xlsx) agora com o preço novo? (s/n): ").strip().lower()
+    if resposta == "s":
+        subprocess.run([sys.executable, "gerar_planilha.py"])
+        subprocess.run([sys.executable, "gerar_dashboard.py"])
+        print("\n💡 Planilhas regeneradas com o novo preço!")
+    else:
+        print("\n💡 Lembre-se de rodar 'python gerar_planilha.py' e 'python gerar_dashboard.py' quando quiser")
+        print("   aplicar esse novo preço nos arquivos .xlsx.")
+
+
+if __name__ == "__main__":
+    main()
