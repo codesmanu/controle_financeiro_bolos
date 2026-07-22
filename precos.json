@@ -1,0 +1,67 @@
+{
+  "farinha_trigo": {
+    "nome": "Farinha de Trigo",
+    "embalagem": "1000g",
+    "preco": 5.75
+  },
+  "acucar": {
+    "nome": "Açúcar",
+    "embalagem": "1000g",
+    "preco": 4.0
+  },
+  "margarina": {
+    "nome": "Margarina",
+    "embalagem": "250g",
+    "preco": 2.99
+  },
+  "leite_liquido": {
+    "nome": "Leite Líquido",
+    "embalagem": "1000ml",
+    "preco": 7.0
+  },
+  "fermento": {
+    "nome": "Fermento em Pó",
+    "embalagem": "100g",
+    "preco": 3.75
+  },
+  "ovos": {
+    "nome": "Ovos",
+    "embalagem": "1 un",
+    "preco": 0.6
+  },
+  "leite_condensado": {
+    "nome": "Leite Condensado (3 caixas)",
+    "embalagem": "395g",
+    "preco": 18.75
+  },
+  "creme_de_leite": {
+    "nome": "Creme de Leite (3 caixas)",
+    "embalagem": "200g",
+    "preco": 9.75
+  },
+  "chocolate_po": {
+    "nome": "Chocolate em Pó 50%",
+    "embalagem": "1000g",
+    "preco": 55.0
+  },
+  "coco_ralado": {
+    "nome": "Coco Ralado",
+    "embalagem": "50g",
+    "preco": 3.99
+  },
+  "leite_em_po": {
+    "nome": "Leite em Pó",
+    "embalagem": "200g",
+    "preco": 7.75
+  },
+  "calda_refrigerante": {
+    "nome": "Calda de Refrigerante",
+    "embalagem": "Garrafa",
+    "preco": 12.5
+  },
+  "kit_embalagem": {
+    "nome": "Kit Embalagem + Delivery",
+    "embalagem": "Kit",
+    "preco": 0.9
+  }
+}
